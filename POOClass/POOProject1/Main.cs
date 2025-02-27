@@ -89,7 +89,7 @@ public class Time
 
     public Time Add(Time other)
     {
-        int totalMilliseconds = (int)(this.ToMilliseconds() + other.ToMilliseconds());
+        int totalMilliseconds = this._milliseconds + other._milliseconds;
 
         int newHours = (totalMilliseconds / (1000 * 3600)) % 24;
         totalMilliseconds %= (1000 * 3600);
