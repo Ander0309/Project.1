@@ -65,22 +65,22 @@ public class Time
 
     private void ValidateHour(int h)
     {
-        if (h < 0 || h > 23) throw new ArgumentException($"The hour: {h}, is not valid.");
+        if (h < 0 || h > 23) throw new Exception($"The hour: {h}, is not valid.");
     }
 
     private void ValidateMinute(int m)
     {
-        if (m < 0 || m > 59) throw new ArgumentException($"The minutes: {m}, is not valid.");
+        if (m < 0 || m > 59) throw new Exception($"The minutes: {m}, is not valid.");
     }
 
     private void ValidateSecond(int s)
     {
-        if (s < 0 || s > 59) throw new ArgumentException($"The seconds: {s}, is not valid.");
+        if (s < 0 || s > 59) throw new Exception($"The seconds: {s}, is not valid.");
     }
 
     private void ValidateMillisecond(int ms)
     {
-        if (ms < 0 || ms > 999) throw new ArgumentException($"The milliseconds: {ms}, is not valid.");
+        if (ms < 0 || ms > 999) throw new Exception($"The milliseconds: {ms}, is not valid.");
     }
 
     public long ToMilliseconds() => (_hours * 3600000L) + (_minutes * 60000L) + (_seconds * 1000L) + _milliseconds;
@@ -90,13 +90,18 @@ public class Time
     public Time Add(Time other)
     {
         int totalMilliseconds = this._milliseconds + other._milliseconds;
-
-        int newHours = (totalMilliseconds / (1000 * 3600)) % 24;
-        totalMilliseconds %= (1000 * 3600);
-        int newMinutes = totalMilliseconds / (1000 * 60);
-        totalMilliseconds %= (1000 * 60);
-        int newSeconds = totalMilliseconds / 1000;
+        int carrySeconds = totalMilliseconds / 1000;
         int newMilliseconds = totalMilliseconds % 1000;
+
+        int totalSeconds = this._seconds + other._seconds + carrySeconds;
+        int carryMinutes = totalSeconds / 60;
+        int newSeconds = totalSeconds % 60;
+
+        int totalMinutes = this._minutes + other._minutes + carryMinutes;
+        int carryHours = totalMinutes / 60;
+        int newMinutes = totalMinutes % 60;
+
+        int newHours = (this._hours + other._hours + carryHours) % 24;
 
         return new Time(newHours, newMinutes, newSeconds, newMilliseconds);
     }
@@ -108,9 +113,8 @@ public class Time
 
     public override string ToString()
     {
-        int displayHour = (_hours == 0 || _hours == 12) ? 12 : _hours % 12;
+        int displayHour = (_hours == 0) ? 0 : (_hours <= 12 ? _hours : _hours - 12);
         string period = _hours < 12 ? "AM" : "PM";
         return $"{displayHour:00}:{_minutes:00}:{_seconds:00}.{_milliseconds:000} {period}";
     }
 }
-
